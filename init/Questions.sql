@@ -553,23 +553,64 @@ WHERE
 
 
 -- 41 查询不同课程成绩相同的学生的学生编号、课程编号、学生成绩
+select DISTINCT b.s_id,b.c_id,b.s_Score from Score a,Score b where a.c_id != b.c_id and a.s_Score = b.s_Score
 
 -- 42、查询每门功成绩最好的前两名
         -- 牛逼的写法
-
+SELECT
+	a.s_id,
+	a.c_id,
+	a.s_score
+FROM
+	Score a
+WHERE
+	( SELECT COUNT( 1 ) FROM Score b WHERE a.c_id = b.c_id AND a.s_score <= b.s_score ) <= 2
+ORDER BY
+	a.c_id;
 -- 43、统计每门课程的学生选修人数（超过5人的课程才统计）。要求输出课程号和选修人数，查询结果按人数降序排列，若人数相同，按课程号升序排列
+SELECT
+	sc.c_id,
+	count( 1 ) num
+FROM
+	Score sc
+GROUP BY
+	sc.c_id
+HAVING
+	num >= 5
+ORDER BY
+	num DESC,
+	sc.c_id ASC;
 
 -- 44、检索至少选修两门课程的学生学号
-
+Select sc.s_id FROM Score sc group by sc.s_id having count(1) >= 2;
 -- 45、查询选修了全部课程的学生信息
-
+SELECT
+	st.*
+FROM
+	Student st
+WHERE
+	st.s_id IN (
+	SELECT
+		sc.s_id
+	FROM
+		Score sc
+	GROUP BY
+		sc.s_id
+HAVING
+	count( 1 ) = ( SELECT count( 1 ) FROM Course ))
 --46、查询各学生的年龄
     -- 按照出生日期来算，当前月日 < 出生年月的月日则，年龄减一
-
+SELECT
+	s_birth,
+	(
+	DATE_FORMAT( NOW(), '%Y' )- DATE_FORMAT( s_birth, '%Y' ))- ( CASE WHEN DATE_FORMAT( NOW(), '%M%D' ) > DATE_FORMAT( s_birth, '%M%D' ) THEN 0 ELSE 1 END )
+FROM
+	Student
 -- 47、查询本周过生日的学生
-
+Select * FROM Student where week(DATE_FORMAT(NOW(),'%y%m%d'))=week(s_birth);
 -- 48、查询下周过生日的学生
-
+Select * FROM Student where week(DATE_FORMAT(NOW(),'%y%m%d')) + 1=week(s_birth);
 -- 49、查询本月过生日的学生
-
+Select * FROM Student where week(DATE_FORMAT(NOW(),'%y%m%d'))=week(s_birth);
 -- 50、查询下月过生日的学生
+Select * FROM Student where week(DATE_FORMAT(NOW(),'%y%m%d')) + 1=week(s_birth);
